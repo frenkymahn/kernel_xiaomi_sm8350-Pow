@@ -56,11 +56,12 @@ jobs:
           # Ensure the configuration is valid
           make O=out CC=clang LLVM=1 LLVM_IAS=1 olddefconfig
 
-          # Compile the kernel
+          # Compile Image, dtbs, and dtbo.img
           make -j$(nproc --all) O=out \
             CC=clang \
             LLVM=1 \
-            LLVM_IAS=1
+            LLVM_IAS=1 \
+            Image dtbs dtbo.img || make -j$(nproc --all) O=out CC=clang LLVM=1 LLVM_IAS=1
 
       - name: Package with AnyKernel3
         run: |
@@ -70,10 +71,17 @@ jobs:
           # Disable device assertion check
           sed -i 's/do.devicecheck=1/do.devicecheck=0/g' anykernel.sh
 
-          # Copy compiled binaries into AnyKernel3 directory
+          # Copy kernel Image
           cp ../out/arch/arm64/boot/Image .
-          [ -f ../out/arch/arm64/boot/dtb ] && cp ../out/arch/arm64/boot/dtb . || true
-          [ -f ../out/arch/arm64/boot/dtbo.img ] && cp ../out/arch/arm64/boot/dtbo.img . || true
+
+          # Concatenate all generated dtbs into a single dtb binary
+          find ../out/arch/arm64/boot/dts/vendor/qcom -name "*.dtb" -exec cat {} + > dtb || true
+          if [ ! -s dtb ]; then
+            find ../out/arch/arm64/boot -name "*.dtb" -exec cat {} + > dtb || true
+          fi
+
+          # Find and copy dtbo.img
+          find ../out/arch/arm64/boot -name "dtbo.img" -exec cp {} . \; || true
 
           # Create flashable zip package
           zip -r9 ../kernel-flashable-Next-Gen.zip * -x .git README.md *placeholder
