@@ -24,8 +24,7 @@ jobs:
 
       - name: Download mkdtboimg tool
         run: |
-          wget -q https://android.googlesource.com/platform/system/libufdt/+archive/refs/heads/main/utils.tar.gz
-          tar -xf utils.tar.gz
+          curl -sSL "https://raw.githubusercontent.com/LineageOS/android_system_libufdt/lineage-20.0/utils/mkdtboimg.py" -o mkdtboimg.py
           chmod +x mkdtboimg.py
           sudo cp mkdtboimg.py /usr/local/bin/
 
@@ -73,7 +72,7 @@ jobs:
           # Generate dtbo.img using mkdtboimg.py
           find out/arch/arm64/boot/dts -name "*dtbo.dtb" -o -name "*dtbo.img" > dtbo_list.txt || true
           if [ -s dtbo_list.txt ]; then
-            python3 mkdtboimg.py create out/arch/arm64/boot/dtbo.img $(cat dtbo_list.txt)
+            python3 /usr/local/bin/mkdtboimg.py create out/arch/arm64/boot/dtbo.img $(cat dtbo_list.txt)
           fi
 
       - name: Package with AnyKernel3
