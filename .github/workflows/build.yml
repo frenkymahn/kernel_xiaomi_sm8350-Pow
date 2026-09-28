@@ -64,7 +64,7 @@ jobs:
 
       - name: Package with AnyKernel3
         run: |
-          git clone https://github.com/frenkymahn/kernel_xiaomi_sm8350-Pow/archive/refs/heads/lineage-24.0.ziposm0sis/AnyKernel3.git AK3
+          git clone https://github.com/osm0sis/AnyKernel3.git AK3
           cd AK3
 
           # Disable device assertion check
